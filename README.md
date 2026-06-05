@@ -1,149 +1,137 @@
-# Azure Medallion Data Pipeline
+# Real-Time Supply Chain Streaming Analytics
 
+An end-to-end data engineering pipeline that simulates a real-world supply chain system — processing live order events through Kafka, applying Medallion Architecture on Databricks, orchestrating with Airflow, and surfacing KPIs in Power BI.
 
-.
+---
 
-🚀 Scalable Data Pipeline Using Azure ADF, Databricks, Synapse & Medallion Architecture
-📌 Overview
+## What this project does
 
-This project demonstrates how to build a scalable, production-grade data pipeline using Azure Data Factory, Azure Data Lake Gen2, Azure Databricks, and Azure Synapse Analytics. It follows the Medallion Architecture (Bronze → Silver → Gold) and covers real-world scenarios commonly asked in data engineering interviews. The solution ingests raw files from GitHub APIs, transforms them using PySpark, loads structured data into Synapse, and visualizes insights with Power BI.
+Raw supply chain orders are generated and streamed through **Apache Kafka** at ~20 events/sec. A consumer picks them up and pushes data through three structured layers — Bronze (raw), Silver (cleaned), Gold (aggregated business metrics) — all orchestrated by **Apache Airflow** and stored on **Databricks Delta Lake**.
 
-⭐ Features
+Final output: a **Power BI dashboard** showing revenue by product, orders by warehouse, and fulfilment status in near real-time.
 
-API-based ingestion of GitHub-hosted CSV files into Azure Data Lake Bronze layer
+---
 
-PySpark transformations in Azure Databricks → Silver layer
+## Architecture
 
-Data warehousing using Azure Synapse (Gold layer)
+```
+CSV Data Generator
+      ↓
+Kafka Producer → Kafka Topic (5,000+ order events)
+      ↓
+Kafka Consumer → Bronze Layer (raw ingestion)
+      ↓
+         Silver Layer (cleaning, null handling, standardization)
+      ↓
+         Gold Layer (revenue aggregations, KPIs)
+      ↓
+Airflow DAGs (orchestration + scheduling + retry logic)
+      ↓
+Power BI Dashboard (business reporting)
+```
 
-Dynamic & parameterized pipelines in Azure Data Factory
+---
 
-Power BI dashboards connected to Synapse
+## Tech Stack
 
-End-to-end implementation of Medallion Architecture
+| Layer | Tool |
+|---|---|
+| Streaming | Apache Kafka |
+| Processing | Python, PySpark |
+| Storage | Databricks Delta Lake |
+| Orchestration | Apache Airflow |
+| Visualization | Power BI |
+| Environment | Ubuntu Linux |
 
-🛠️ Technologies Used
+---
 
-Azure Data Factory – orchestration & pipeline scheduling
+## Medallion Architecture
 
-Azure Data Lake Gen2 – hierarchical storage layers
+**Bronze** — Raw Kafka consumer output. Unprocessed, stored as single source of truth.
 
-Azure Databricks (Apache Spark & PySpark) – scalable data transformations
+**Silver** — Cleaned dataset. Null values handled, formats standardized, schema enforced.
 
-Azure Synapse Analytics – SQL data warehouse, external tables
+**Gold** — Business-ready aggregations: Revenue by Product, Revenue by Warehouse, Orders by Status, Total Units Sold.
 
-Power BI – reporting & KPI dashboards
+---
 
-REST API – GitHub raw CSV data extraction
+## Airflow Orchestration
 
-📁 Project Architecture
-1. Data Ingestion (Bronze Layer)
+Four DAGs manage the pipeline:
 
-Source: GitHub REST API containing AdventureWorks CSVs
+- `bronze_dag.py` — ingests from Kafka consumer output
+- `silver_dag.py` — runs cleaning transformations
+- `gold_dag.py` — runs aggregations
+- `master_pipeline_dag.py` — chains all three with dependency management, retry logic, and daily scheduling
 
-ADF Copy Activity loads raw files exactly as received
+---
 
-Stored in Bronze container: /bronze/<dataset_name>/<YYYY>/<MM>/<DD>/
+## Project Structure
 
-2. Data Transformation (Silver Layer)
+```
+SUPPLY_CHAIN_PROJECT/
+├── Data_generation/       # synthetic order event generator
+├── kafka_producer/        # publishes events to Kafka topic
+├── kafka_consumer/        # consumes and writes to Bronze
+├── airflow_dags/
+│   ├── bronze_dag.py
+│   ├── silver_dag.py
+│   ├── gold_dag.py
+│   └── master_pipeline_dag.py
+└── data/
+    ├── bronze/
+    ├── silver/
+    └── gold/
+```
 
-Databricks notebooks clean, validate, join, apply schema
+---
 
-PySpark transformations
+## How to Run
 
-Output stored in Silver container: optimized Delta format
+```bash
+# 1. Activate virtual environment
+python -m venv venv && source venv/bin/activate
 
-3. Data Warehousing (Gold Layer)
+# 2. Start Kafka (Zookeeper + Broker)
+bin/zookeeper-server-start.sh config/zookeeper.properties
+bin/kafka-server-start.sh config/server.properties
 
-Synapse Analytics external tables referencing Silver data
+# 3. Run producer and consumer
+python kafka_producer/producer.py
+python kafka_consumer/consumer.py
 
-Fact & Dimension models created
+# 4. Start Airflow
+airflow webserver -p 8080
+airflow scheduler
 
-Data ready for BI consumption
+# 5. Trigger master DAG from Airflow UI
+# 6. Connect Power BI to Gold layer output
+```
 
-4. Reporting
+---
 
-Power BI connects to Synapse using DirectQuery
+## Key Challenges Solved
 
-Dashboards for Sales, Products, Customers & Returns
+- Kafka offset handling and consumer group management
+- Airflow DAG folder configuration and environment isolation
+- Python version compatibility across pipeline components
+- Structured debugging approach using virtual environments and clear layer separation
 
-📦 Dataset
+---
 
-Uses AdventureWorks (2015–2017) dataset containing:
+## Future Enhancements
 
-Sales
+- Deploy on Azure / AWS
+- Dockerize the full pipeline
+- Add data quality checks (Great Expectations)
+- CI/CD integration
+- FastAPI layer for external data access
 
-Returns
+---
 
-Products
+## Author
 
-Customers
-
-Calendar
-
-Sources: Kaggle Adventure Works
-
-Kaggle Adventure Works Dataset
-
-GitHub API-hosted CSV files
-
-🚀 Getting Started
-Prerequisites
-
-Azure account (Free tier + $200 credits recommended)
-
-Basic Spark & Azure knowledge
-
-Power BI Desktop (optional)
-
-Step-by-Step Setup
-1. Create Azure Resources
-
-Resource Group
-
-ADLS Gen2
-
-Azure Data Factory
-
-Databricks Workspace
-
-Synapse Analytics Workspace
-
-2. Configure Storage Layers
-
-Create containers:
-
-bronze/
-
-silver/
-
-gold/
-
-3. Build Data Ingestion (ADF)
-
-Create Linked Services (HTTP, ADLS)
-
-Create datasets for GitHub & ADLS
-
-Build parameterized pipelines → Copy Activity
-
-4. Build Transformations (Databricks)
-
-Use PySpark to clean & enrich Bronze data
-
-Write optimized Delta files into Silver
-
-5. Load into Synapse
-
-Create external tables using OPENROWSET
-
-Build Fact & Dimension tables in the Gold layer
-
-6. Visualization (Power BI)
-
-Connect Power BI to Synapse
-
-Design reports and dashboards
+**Sathwik Kotian** — [LinkedIn](https://www.linkedin.com/in/sathwik-kotian-bb6791265/) · [GitHub](https://github.com/sathwikkotyan)
 
 
 
