@@ -59,7 +59,7 @@ Source: Kaggle AdventureWorks / GitHub-hosted CSVs
 
 ### Bronze — Raw Ingestion
 - ADF Copy Activity pulls CSVs from GitHub API
-- Files stored exactly as received in `/bronze/<dataset>/YYYY/MM/DD/`
+- Files stored exactly as received in `/bronze/<dataset>/2026/01/15/`
 - No transformation — preserves source truth
 
 ### Silver — Transformation
