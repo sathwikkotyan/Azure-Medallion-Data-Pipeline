@@ -129,12 +129,11 @@ airflow scheduler
 
 ---
 
+📊 End-to-End Architecture Diagram
+<img width="1529" height="1079" alt="image" src="https://github.com/user-attachments/assets/9c37f12a-4866-4705-8e1c-bd449ee891d4" />
+
+
 ## Author
 
 **Sathwik Kotian** — [LinkedIn](https://www.linkedin.com/in/sathwik-kotian-bb6791265/) · [GitHub](https://github.com/sathwikkotyan)
-
-
-
-📊 End-to-End Architecture Diagram
-<img width="1529" height="1079" alt="image" src="https://github.com/user-attachments/assets/9c37f12a-4866-4705-8e1c-bd449ee891d4" />
 
